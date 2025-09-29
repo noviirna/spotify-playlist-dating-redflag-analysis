@@ -4,14 +4,15 @@
 
 ## **Summary: Integrating Data Scraping with Gen AI**
 
-This is a fun project that dives deep into a user's Spotify playlist to generate an entertaining _"dating red flag"
-personality analysis_. Just a heads-up: it’s all for fun and shouldn't be used for actual psychological screening!
+This is an end-to-end Python project that analyzes a user's Spotify playlist to generate an entertaining "dating red flag" personality analysis.
 
-The main goal was to build a solid, end-to-end data pipeline by:
+This project represents the successful **MVP (Minimum Viable Product)** build, which was executed in seven days of focused part-time work to quickly demonstrate core technical proficiency in Python.
 
-- **Acquiring Complex Data**: Grabbing songs from a public Spotify playlist using customized data scraping techniques.
-- **Generating Insights**: Crafting a personality analysis centered on potential "dating red flags."
-- **Leveraging GenAI**: Using the Google Vertex AI API SDK to generate structured, nuanced text
+The MVP's main objective was to validate a solid, production-ready data pipeline by:
+- **Data Acquisition**: Grabbing songs from a public Spotify playlist using customized data scraping techniques (network traffic interception from Web UI).
+- **GenAI Integration**: Leveraging the 3rd party API SDK to generate structured, nuanced text.
+- **Prompt Engineering**: Crafting the personality analysis by designing an optimal prompt and system instructions to achieve the desired content goal.
+- **Pipeline Engineering**: Implementing a complete data flow from unformatted scrape data to final, formatted output.
 
 -----
 
@@ -19,23 +20,20 @@ The main goal was to build a solid, end-to-end data pipeline by:
 
 - **Generative AI**: This demonstrates direct SDK integration and my skills in prompt engineering, using System
   Instructions, parameter configurations and specific prompt to ensure the output is structured, relevant and reliable.
-- **Web Scraping (Selenium)**: This was a challenge! It showcases dynamic data acquisition by automating browser
-  interaction and actively intercepting network calls—not just scraping static pages.
+- **Web Scraping (Selenium)**: This was a challenge! It showcases dynamic data acquisition by automating browser interaction and actively intercepting network calls, not just scraping static pages, whic is more technically challenging approach.
 - **Python 3**: The entire data pipeline and application logic are built using modern Python 3.
 
 -----
 
 ## Rationale: Why didn't I just use the Spotify API?
 
-That's a great question! I know the easiest route would've been to grab the data using the official Spotify API, but I
-intentionally decided against it.
+That's a great question! I know the easiest route would've been to grab the data using the official Spotify API, but I  intentionally decided against it.
 
-This project is a first-time exploration into data acquisition. I wanted to challenge myself (and showcase my skills) by
-using the Python Selenium library to perform dynamic scraping.
+This project is a first-time exploration into data acquisition. I wanted to challenge myself (and showcase my skills) by using the Python Selenium library to perform dynamic scraping.
 
-That means I set up the code to actively listen to and intercept network calls as the playlist loads. It was a
-deliberate technical choice to demonstrate real-world skills in dynamic scraping and network traffic analysis in Python,
-proving I can handle more than just standard API consumption.
+That means I set up the code to actively listen to and intercept network calls as the playlist web page loads.
+
+It was a deliberate technical choice to demonstrate real-world skills in dynamic scraping and network traffic analysis in Python, proving I can handle more than just standard API consumption.
 
 -----
 
@@ -148,10 +146,8 @@ OUTPUT_FILENAME_SONGS_DETAILS=songs_details
 
 -----
 
-## **Future Updates**
-
-Future plans for this project include:
-
+## **Future Roadmap (Post-MVP)**
+The immediate roadmap focuses on expanding data context and analysis depth, building directly on the successful MVP foundation:
 * **Trying New AI Voices**: Looking into other GenAI providers (especially those with a great free tier!) to see how
   their models analyze music and if we can get a different "vibe" for the analysis.
 * **Deeper Data Dive**: I'll be trying to scrape more detailed metrics like Genre, BPM, and Mood from the network
