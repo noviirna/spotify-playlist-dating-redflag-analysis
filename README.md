@@ -20,20 +20,22 @@ The MVP's main objective was to validate a solid, production-ready data pipeline
 
 - **Generative AI**: This demonstrates direct SDK integration and my skills in prompt engineering, using System
   Instructions, parameter configurations and specific prompt to ensure the output is structured, relevant and reliable.
-- **Web Scraping (Selenium)**: This was a challenge! It showcases dynamic data acquisition by automating browser interaction and actively intercepting network calls, not just scraping static pages, whic is more technically challenging approach.
+- **Spotify Web API**: Uses the official Spotify Web API for reliable and efficient data acquisition from playlists.
 - **Python 3**: The entire data pipeline and application logic are built using modern Python 3.
 
 -----
 
-## Rationale: Why didn't I just use the Spotify API?
+## Rationale: Why use the Spotify Web API?
 
-That's a great question! I know the easiest route would've been to grab the data using the official Spotify API, but I  intentionally decided against it.
+The project has been updated to use the official Spotify Web API for several key benefits:
 
-This project is a first-time exploration into data acquisition. I wanted to challenge myself (and showcase my skills) by using the Python Selenium library to perform dynamic scraping.
+- **Reliability**: Official API provides stable, well-documented endpoints
+- **Performance**: Faster and more efficient than web scraping
+- **Rate Limiting**: Built-in rate limiting prevents API abuse
+- **Data Quality**: Consistent, structured data format
+- **Maintenance**: Less prone to breaking due to UI changes
 
-That means I set up the code to actively listen to and intercept network calls as the playlist web page loads.
-
-It was a deliberate technical choice to demonstrate real-world skills in dynamic scraping and network traffic analysis in Python, proving I can handle more than just standard API consumption.
+The previous version used Selenium for web scraping as a learning exercise in dynamic data acquisition and network traffic analysis.
 
 -----
 
@@ -42,12 +44,12 @@ It was a deliberate technical choice to demonstrate real-world skills in dynamic
 This is the overall flow of the application:
 
 ```
-Spotify Playlist ⟶ Data Scraping ⟶ Data Cleaning ⟶ AI Model ⟶ Analysis Output
+Spotify Playlist ⟶ Spotify Web API ⟶ Data Processing ⟶ AI Model ⟶ Analysis Output
 ```
 
 1. The application is run with a single command-line argument: the URL of a public Spotify playlist.
-2. **Selenium** takes over, automating the web browser to navigate to the URL.
-3. The application listens to the network traffic and extracts a list of songs and artists from the web UI elements.
+2. **Spotify Web API** is used to fetch playlist tracks and metadata directly from Spotify's servers.
+3. The API returns structured data containing song titles, artists, and other metadata.
 4. The extracted data, along with specific prompts and system instructions, is sent to the GenAI model.
 5. The AI model, accessed via the Vertex AI API SDK, generates the personality analysis based on the provided data and
    instructions.
@@ -63,6 +65,7 @@ Spotify Playlist ⟶ Data Scraping ⟶ Data Cleaning ⟶ AI Model ⟶ Analysis O
 You'll need a few things to get started:
 
 * **Python 3** installed on your device
+* **Spotify Developer Account:** Create an app at https://developer.spotify.com/dashboard to get your client ID and secret
 * **Google Vertex AI API Key and Authentication:** All required environment variables are listed in the
   `Environment Variables` section.
 * **Python Modules:** All required modules are listed in the `requirements.txt` file.
@@ -113,6 +116,11 @@ You'll need a few things to get started:
 This project relies on several environment variables for configuration. Here's a quick look at what they do:
 
 ```dotenv
+# Spotify API credentials (mandatory)
+SPOTIFY_CLIENT_ID=string. mandatory. Spotify app client ID, get yours from https://developer.spotify.com/dashboard
+SPOTIFY_CLIENT_SECRET=string. mandatory. Spotify app client secret, get yours from https://developer.spotify.com/dashboard
+
+# Google AI credentials (mandatory)
 GOOGLE_CLOUD_API_KEY=string. mandatory. API key, get yours from https://aistudio.google.com/app/api-keys
 GOOGLE_GENAI_MODEL_TYPE=string. gemini model id. if left empty, the default value is defined at noviirnawati/config/sdk_configuration.py 
 
@@ -130,6 +138,11 @@ OUTPUT_FILENAME_SONGS_DETAILS=string. optional. file name of which cleaned data 
 A sample populated with example data types:
 
 ```dotenv
+# Spotify API credentials
+SPOTIFY_CLIENT_ID=your_spotify_client_id_here
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here
+
+# Google AI credentials
 GOOGLE_CLOUD_API_KEY=API key, get yours from https://aistudio.google.com/app/api-keys
 GOOGLE_GENAI_MODEL_TYPE=gemini-2.0-flash-001
 
