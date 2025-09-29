@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 
 from .web_api_netlog_processor import process_network_logs
 from ..constant.constant import Spotify
+from ..helper import str_utility
 from ..helper.validator import validate_url
 
 
@@ -69,12 +70,12 @@ def scrape_spotify_playlist_page(playlist_url: str):
         scroll_down_element_until_end(driver,
                                       By.CLASS_NAME,
                                       Spotify.ELEMENT_SELECTED)
-
+        playlist_id: str = str_utility.extract_playlist_id(playlist_url)
         # Filter data from API, this approach chosen because there are no identifier in UI
-        song_collections = process_network_logs(driver)
+        song_collections = process_network_logs(driver, playlist_id)
         driver.quit()
         return song_collections
     except Exception:
         traceback.print_exc()
     finally:
-        print("end")
+        print("Finished scraping web page")

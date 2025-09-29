@@ -1,5 +1,5 @@
 import json
-import traceback
+from json import JSONDecodeError
 
 from selenium import webdriver
 from selenium.common import WebDriverException
@@ -59,7 +59,7 @@ def process_artists_names(artists: list[dict]) -> str:
     return names
 
 
-def filter_playlist_items(filtered_network_logs: list[dict]) -> list[PlaylistItem]:
+def filter_playlist_items(filtered_network_logs: list[dict], playlist_id: str) -> list[PlaylistItem]:
     song_details = []
     for log in filtered_network_logs:
         items = (log
@@ -76,7 +76,7 @@ def filter_playlist_items(filtered_network_logs: list[dict]) -> list[PlaylistIte
                 song_details.append(PlaylistItem(title, process_artists_names(artists)))
 
             if DATA_SCRAPING_SAVE_SONGS_DETAILS:
-                write_output_to_json(OUTPUT_FILENAME_SONGS_DETAILS,
+                write_output_to_json(OUTPUT_FILENAME_SONGS_DETAILS, playlist_id,
                                      json.dumps(song_details, default=lambda o: o.encode()))
         else:
             print("items is empty")
@@ -84,7 +84,7 @@ def filter_playlist_items(filtered_network_logs: list[dict]) -> list[PlaylistIte
     return song_details
 
 
-def filter_network_logs(driver: webdriver.Chrome) -> list[dict]:
+def filter_network_logs(driver: webdriver.Chrome, playlist_id: str) -> list[dict]:
     # Fets all the logs from performance in Chrome
     log_entries = driver.get_log(CONSTANT.KEY_CHROME_LOG_PERFORMANCE)
 
@@ -120,23 +120,22 @@ def filter_network_logs(driver: webdriver.Chrome) -> list[dict]:
             generated_json = {CONSTANT.KEY_REQUEST: request_body, CONSTANT.KEY_RESPONSE: response_body}
             datas += (json.dumps(generated_json) + Generic.COMMA_STRING)
 
-        except Exception:
-            traceback.print_exc()
+        except JSONDecodeError:
             continue
 
     datas = datas.rstrip(Generic.COMMA_STRING)
     datas += "]"
 
     if DATA_SCRAPING_SAVE_API_DETAILS:
-        write_output_to_json(OUTPUT_FILENAME_API_DETAILS, datas)
+        write_output_to_json(OUTPUT_FILENAME_API_DETAILS, playlist_id, datas)
 
     return json.loads(datas)
 
 
-def process_network_logs(driver: webdriver.Chrome) -> list[PlaylistItem]:
+def process_network_logs(driver: webdriver.Chrome, playlist_id: str) -> list[PlaylistItem]:
     # Filter only relevant traffic from network logs
-    filtered_logs = filter_network_logs(driver)
+    filtered_logs = filter_network_logs(driver, playlist_id)
 
     # Filter so you only get the song and
-    final_result = filter_playlist_items(filtered_logs)
+    final_result = filter_playlist_items(filtered_logs, playlist_id)
     return final_result

@@ -1,0 +1,4 @@
+Perform a dating red flag analysis on the following music playlist.
+The playlist data is provided as a semicolon-separated list in the format: Song Title - Artist.
+Use the themes and moods of the songs to infer potential personality concerns.
+Strictly follow the MARKDOWN format defined in your instructions.

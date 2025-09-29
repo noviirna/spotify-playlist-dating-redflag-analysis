@@ -1,69 +1,83 @@
 import os.path
-from datetime import date
+import traceback
 
 from google import genai
-from google.genai.types import HttpOptions, GenerateContentConfig
+from google.genai import Client
+from google.genai.types import GenerateContentConfig, GenerateContentResponse
 
 from ..config.base_configuration import AI_ANALYSIS_SAVED_AS_MARKDOWN
 from ..config.sdk_configuration import (GOOGLE_GENAI_MODEL_TYPE,
-                                        GOOGLE_GENAI_API_VERSION,
-                                        GOOGLE_CLOUD_PROJECT,
-                                        GOOGLE_CLOUD_LOCATION,
-                                        GOOGLE_GENAI_USE_VERTEXAI,
+                                        GOOGLE_GENAI_BASE_PROMPT,
                                         GOOGLE_GENAI_SYSTEM_INSTRUCTION,
                                         GOOGLE_GENAI_TEMPERATURE,
                                         GOOGLE_GENAI_TOP_K,
                                         GOOGLE_GENAI_TOP_P,
-                                        GOOGLE_GENAI_SAFETY_SETTINGS)
+                                        GOOGLE_GENAI_SAFETY_SETTINGS, GOOGLE_CLOUD_API_KEY)
 from ..constant.constant import Generic
+from ..helper import str_utility
 from ..helper.validator import str_is_empty_or_none
 from ..helper.writer import write_output_to_markdown
+from ..model.model import PlaylistItem
 
 
-def build_prompt(songs_collections: list) -> str:
+def build_prompt(songs_collections: list[PlaylistItem]) -> str:
     if len(songs_collections) == 0: return Generic.EMPTY_STRING
-    return "TODO"  # TODO EXPERIMENT ON GEMINI
+    prompt = "Playlist Data (Semicolon-separated list: Song Title - Artist; Song Title - Artist, ...):"
+
+    for song in songs_collections:
+        prompt += Generic.WHITESPACE
+        prompt += song.title
+        prompt += " - "
+        prompt += song.artist
+        prompt += ";"
+
+    return prompt
 
 
 def construct_markdown_filename(url: str) -> str:
-    splitted_url = url.split("/")
-    return os.path.join("output_result-" + splitted_url[
-        len(splitted_url) - 1] + "-" + date.today().strftime("%y%m%d"))
+    return os.path.join("output_result-" + str_utility.extract_playlist_id(url))
 
 
-def ai_analysis_google(prompt: str) -> str:
-    client = genai.Client(vertexai=GOOGLE_GENAI_USE_VERTEXAI, project=GOOGLE_CLOUD_PROJECT,
-                          location=GOOGLE_CLOUD_LOCATION,
-                          http_options=HttpOptions(api_version=GOOGLE_GENAI_API_VERSION))
+def ai_analysis_google(prompt_context: str) -> str:
+    client: Client = genai.Client(api_key=GOOGLE_CLOUD_API_KEY)
+    print("Generate GenAI Client")
 
-    response = Generic.EMPTY_STRING
-    for chunk in client.models.generate_content_stream(
-            model=GOOGLE_GENAI_MODEL_TYPE,
-            contents=prompt,
-            config=GenerateContentConfig(
-                system_instruction=GOOGLE_GENAI_SYSTEM_INSTRUCTION,
-                temperature=GOOGLE_GENAI_TEMPERATURE,
-                top_p=GOOGLE_GENAI_TOP_P,
-                top_k=GOOGLE_GENAI_TOP_K,
-                safety_settings=GOOGLE_GENAI_SAFETY_SETTINGS
-            )):
-        print(chunk.text)
-        response += chunk.text
-    return response
+    print("Begin generating content")
+    response: GenerateContentResponse = client.models.generate_content(
+        model=GOOGLE_GENAI_MODEL_TYPE,
+        contents=[GOOGLE_GENAI_BASE_PROMPT, prompt_context],
+        config=GenerateContentConfig(
+            system_instruction=GOOGLE_GENAI_SYSTEM_INSTRUCTION,
+            temperature=GOOGLE_GENAI_TEMPERATURE,
+            top_p=GOOGLE_GENAI_TOP_P,
+            top_k=GOOGLE_GENAI_TOP_K,
+            safety_settings=GOOGLE_GENAI_SAFETY_SETTINGS
+        ))
+    print("Finished generating content")
+    client.close()
+    print("Closing GenAI Client")
+    return response.text
 
 
 def ai_analysis(song_collections: list, url: str):
     try:
-        prompt = build_prompt(song_collections)
-        if str_is_empty_or_none(prompt): return "No Results"
+        prompt_context = build_prompt(song_collections)
+        if str_is_empty_or_none(prompt_context): raise AssertionError("No prompt context")
 
         # TODO: try multiple SDK provider besides google, create a switch case, choose the provider based on the environment variable
-        response = ai_analysis_google(prompt)
+        response = ai_analysis_google(prompt_context)
 
         # save as markdown only if the environment variables say so
         if AI_ANALYSIS_SAVED_AS_MARKDOWN:
-            write_output_to_markdown(construct_markdown_filename(url), response)
+            write_output_to_markdown("result", str_utility.extract_playlist_id(url), response)
 
+        print("\n\n\nPrinting generated response\n\n\n")
+        print(response)
+        print("\n\n\nFinished printing generated response\n\n\n")
         return response
+
     except Exception:
-        return "No Result, please try again with a different URL"
+        traceback.print_exc()
+        response = "No Result, please try again with a different URL"
+        print(response)
+        return response
